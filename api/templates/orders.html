@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    // click on button submit
+    $("#submit").on('click', function(){
+        var data = $("#form").serializeArray();
+        //console.log(data);
+        var dataObj = {};
+        $.each(data, function(i, v) {
+            dataObj[v.name] = v.value;
+        });
+        //console.log(dataObj);
+        //return false;
+
+        // send ajax
+        $.ajax({
+            url: '/api/1.0/orders',
+            type : "POST",
+            contentType: 'application/json; charset=utf-8',
+            dataType : 'json', // data type
+            data : JSON.stringify(dataObj),
+            success : function(result) {
+                // you can see the result from the console
+                // tab of the developer tools
+                console.log(result);
+            },
+            error: function(xhr, resp, text) {
+                console.log(xhr, resp, text);
+            }
+        });
+    });
+});
+</script>
+<body>
+<form id="form">
+<p>Order Number: <input type="text" name="orderNumber" value="232-9384712-9823512" /></p>
+<p>Estimated delivery by <input type="text" name="estimatedDelivery" value="Dec. 20, 2016 - Dec. 30, 2016" /></p>
+<p><input type="button" value="submit" id="submit" /></p>
+</form>
+</body>
+</html>
+
