@@ -1,0 +1,74 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${app_name}
+  namespace: ${namespace}
+spec:
+  selector:
+    app: ${app_name}
+  ports:
+  - protocol: "TCP"
+    port: ${port_num}
+    targetPort: ${port_num}
+  type: LoadBalancer
+...
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${app_name}
+  namespace: ${namespace}
+spec:
+  selector:
+    matchLabels:
+      app: ${app_name}
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: ${app_name}
+    spec:
+      containers:
+      - name: ${app_name}
+        image: ghcr.io/eparisca/${app_name}:${image_version}
+        imagePullPolicy: Never
+        ports:
+        - containerPort: ${port_num}
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: ${port_num}
+          initialDelaySeconds: 3
+          periodSeconds: 30
+          timeoutSeconds: 3
+          successThreshold: 3
+          failureThreshold: 3
+        resources:
+          limits:
+            cpu: ${container_cpu_limits}
+          requests:
+            cpu: ${container_cpu_requests}
+...
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${app_name}
+  namespace: ${namespace}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ${app_name}
+  minReplicas: ${min_replicas}
+  maxReplicas: ${max_replicas}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+...

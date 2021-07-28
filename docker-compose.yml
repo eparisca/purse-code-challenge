@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  purse-code-challenge:
+    image: purse-code-challenge:1.0.0
+    ports:
+      - 5000:5000
+    depends_on:
+      - purse-db
+  purse-db:
+    image: purse-db:1.0.0
+    environment:
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=fakePass
+      - POSTGRES_DB=purse
